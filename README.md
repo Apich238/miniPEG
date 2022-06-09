@@ -16,7 +16,7 @@ used by me in some my projects.
 - left-recursive syntax support
 - define syntax for PEG grammars
 - add tests
-- add examples
+- ~~add examples~~
 - beautify AST processing
 - test performance
 
