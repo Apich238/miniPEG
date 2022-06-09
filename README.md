@@ -9,9 +9,25 @@ used by me in some my projects.
 
 # What is PEG
 
-# Why use PEG
+# Why to use PEG
 
 # TODO
 
 - left-recursive syntax support
 - define syntax for PEG grammars
+- add tests
+- add examples
+- beautify AST processing
+- test performance
+
+# Notable projects on subj
+
+- https://github.com/daisyjanebolivar/Recursive-descent-parser
+- https://github.com/sovcn/infix2prefix
+- https://github.com/jjmartens/peg-parser
+- https://github.com/rdtHK/peg
+- https://github.com/llarsen71/PyPE
+- https://github.com/goodmami/pegre
+- https://github.com/pombreda/XPEG
+- https://github.com/justinnhli/pegparse
+- https://github.com/hat-open/hat-peg
