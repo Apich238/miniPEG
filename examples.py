@@ -100,6 +100,9 @@ for l in ls:
 # https://github.com/Apich238/mySAT/blob/master/logic/prop.py
 
 
+# fuzzy logic with estimates
+# https://github.com/Apich238/SysDA/blob/main/log_sys_backend/logic/estimates.py
+
 # 1st order logic
 
 
