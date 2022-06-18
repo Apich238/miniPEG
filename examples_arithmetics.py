@@ -1,10 +1,10 @@
-
 from miniPEG import *
+from tokenizer import RegExpTokenizer
 
 # arithmetics
 
 arith = PEG('expr',
-            {
+            RegExpTokenizer({
                 'num': r'[0-9]+(\.[0-9]*)?',
                 'opbracket': r'\(',
                 'clbracket': r'\)',
@@ -13,7 +13,7 @@ arith = PEG('expr',
                 'prod': r'\*',
                 'div': r'\/',
                 'ignore': r' +'
-            },
+            }),
             {
                 'expr': 'sum',
                 'sum': ['product', zom([sel('plus', 'minus'), 'product'])],
@@ -95,7 +95,6 @@ ls = [
 for l in ls:
     testline(l, arith)
 
-
 # boolean formulas
 # https://github.com/Apich238/mySAT/blob/master/logic/prop.py
 
@@ -120,25 +119,24 @@ for l in ls:
 # const ::= "name"
 # function ::= name( arglist )
 # var :: name
-predp = PEG('expr',
-            {
-                'NEG': r'\-',
-                'CONJ': r'\&',
-                'DISJ': r'\|',
-                'IMPL': r'\>',
-                'ALLQ': r'\@',
-                'EXQ': r'\#',
-                'OPRNTH': r'\(',
-                'CPRNTH': r'\)',
-                'TRUTH': r'[1T]',
-                'FALSE': r'[0F]',
-                'NAME': r'[A-Za-z][A-Za-z0-9]*',
-                'COMMA': r','
-            },
-            {
-                'expr': sel('atomic', ['expr', 'IMPL', 'expr'], ['expr', 'DISJ', 'expr'], ['expr', 'CONJ', 'expr']),
-                'atomic': sel('atom', ['NEG', 'atomic'], ['OPRNTH', 'expr', 'CPRNTH']),
-                'atom': sel('TRUTH', 'FALSE', 'qexpression', 'predicate'),
-                'qexpression': ['quantifier', 'name', 'predicate'],
-            })
-
+# predp = PEG('expr',
+#             {
+#                 'NEG': r'\-',
+#                 'CONJ': r'\&',
+#                 'DISJ': r'\|',
+#                 'IMPL': r'\>',
+#                 'ALLQ': r'\@',
+#                 'EXQ': r'\#',
+#                 'OPRNTH': r'\(',
+#                 'CPRNTH': r'\)',
+#                 'TRUTH': r'[1T]',
+#                 'FALSE': r'[0F]',
+#                 'NAME': r'[A-Za-z][A-Za-z0-9]*',
+#                 'COMMA': r','
+#             },
+#             {
+#                 'expr': sel('atomic', ['expr', 'IMPL', 'expr'], ['expr', 'DISJ', 'expr'], ['expr', 'CONJ', 'expr']),
+#                 'atomic': sel('atom', ['NEG', 'atomic'], ['OPRNTH', 'expr', 'CPRNTH']),
+#                 'atom': sel('TRUTH', 'FALSE', 'qexpression', 'predicate'),
+#                 'qexpression': ['quantifier', 'name', 'predicate'],
+#             })

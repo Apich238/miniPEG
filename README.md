@@ -1,5 +1,5 @@
 # miniPEG
-my own PEG parser.
+my own pacrat PEG parser.
 
 originally it was exercise to create useful PEG parser.
 
@@ -10,6 +10,8 @@ used by me in some my projects.
 # What is PEG
 
 # Why to use PEG
+
+# Tokenizer
 
 # TODO
 

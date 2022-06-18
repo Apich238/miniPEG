@@ -1,5 +1,4 @@
-import re
-import collections
+from tokenizer import Token, aTokenizer
 
 
 # region peg ops
@@ -86,9 +85,6 @@ class TNode:
             c.TreeRepr(ts + 1)
 
 
-Token = collections.namedtuple('Token', ['type', 'value', 'pos'])
-
-
 def packrat_memoization(func):
     def mem_wrapper(self, rule, toks, i):
 
@@ -104,33 +100,13 @@ def packrat_memoization(func):
 
 
 class PEG:
-    def __init__(self, start: str, terms: dict, rules: dict):
-        self.token_rules = terms.copy()
-        self.terms = set(self.token_rules.keys())
+    def __init__(self, start: str, tokenizer: aTokenizer, rules: dict):
+        self.tokenizer = tokenizer
+        self.terms = set(self.tokenizer.token_rules.keys())
         self.rules = rules.copy()
         self.nonterms = set(self.rules.keys())
         self.start = start
         self.mem = {}
-
-    def _tokenize(self, line):
-        '''
-        Токенизация
-        :param line: строка
-        :return:
-        '''
-        # tok_regex = '|'.join('(?P<%s>%s)' % pair for pair in self.terms_spec)
-        tok_regex = '|'.join('(?P<{}>{})'.format(k, self.token_rules[k]) for k in self.token_rules)
-        tok_regex += '|(?P<MISMATCH>.)'
-        line_start = 0
-        for mo in re.finditer(tok_regex, line):
-            kind = mo.lastgroup
-            value = mo.group()
-            column = mo.start() - line_start
-
-            if kind == 'MISMATCH':
-                raise RuntimeError('value {} unexpected at {}'.format(value, line_start))
-
-            yield Token(kind, value, column)
 
     @packrat_memoization
     def _parse(self, symbol, tokens, i):
@@ -143,26 +119,26 @@ class PEG:
         '''
         if i > len(tokens):
             return None
-        if isinstance(symbol,str) and symbol in self.terms:
+        if isinstance(symbol, str) and symbol in self.terms:
             if i < len(tokens) and tokens[i].type == symbol:
                 res = TNode(tokens[i])
                 return res, i + 1
             else:
                 return None
-        elif isinstance(symbol,str) and symbol in self.nonterms:
+        elif isinstance(symbol, str) and symbol in self.nonterms:
             rule = self.rules[symbol]
-        elif isinstance(symbol,(str, list, chk, non, opt, zom, oom, sel)):
+        elif isinstance(symbol, (str, list, chk, non, opt, zom, oom, sel)):
             rule = symbol
         else:
             raise ValueError()
-        if isinstance(rule,str):
+        if isinstance(rule, str):
             res = TNode(symbol)
             se = self._parse(rule, tokens, i)
             if se is None:
                 return None
             res.add(se[0])
             return res, se[1]
-        elif isinstance(rule,list):
+        elif isinstance(rule, list):
             j = i
             res = TNode(symbol if isinstance(symbol, str) else 'seq')
             for sr in rule:
@@ -173,26 +149,26 @@ class PEG:
                     subtree, j = tres
                     res.add(subtree)
             return res, j
-        elif isinstance(rule,sel):
+        elif isinstance(rule, sel):
             alternatives = rule.alternatives
             for a in alternatives:
                 altres = self._parse(a, tokens, i)
                 if not altres is None:
                     return altres
             return None
-        elif isinstance(rule,non):
+        elif isinstance(rule, non):
             tmp = self._parse(rule.x, tokens, i)
             if tmp is None:
                 return TNode(None), i
             else:
                 return None
-        elif isinstance(rule,chk):
+        elif isinstance(rule, chk):
             tmp = self._parse(rule.x, tokens, i)
             if tmp is None:
                 return None
             else:
                 return TNode(None), i
-        elif isinstance(rule,zom):
+        elif isinstance(rule, zom):
             res = TNode('zom')
             j = i
             while True:
@@ -204,13 +180,13 @@ class PEG:
             if len(res.childs) == 0:
                 res = None
             return res, j
-        elif isinstance(rule,opt):
+        elif isinstance(rule, opt):
             optional = self._parse(rule.x, tokens, i)
             if optional is None:
                 return None, i
             else:
                 return optional
-        elif isinstance(rule,oom):
+        elif isinstance(rule, oom):
             one = self._parse(rule.x, tokens, i)
             if one is None:
                 return None
@@ -235,7 +211,7 @@ class PEG:
         :param line:
         :return:
         '''
-        tokens = list(self._tokenize(line))
+        tokens = list(self.tokenizer(line))
         tokens = [t for t in tokens if t.type != 'ignore']
         res = self._parse(self.start, tokens, 0)
         self.mem = {}
@@ -245,4 +221,3 @@ class PEG:
             raise ValueError('остались лишние токены: {}'.format(tokens[res[1]:]))
         else:
             return res[0]
-
